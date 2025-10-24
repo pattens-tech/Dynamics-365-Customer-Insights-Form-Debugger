@@ -1,6 +1,6 @@
 # Dynamics 365 Form Tester
 
-![image](https://repository-images.githubusercontent.com/1082111680/671a8db4-7243-45e4-9a30-f3332bd3a4d0)
+![image](https://repository-images.githubusercontent.com/1082475662/d07f2266-beae-4747-bfc8-2be84cf6efa2)
 
 Temporarily disables **Dynamics 365 Customer Insights Forms** cache, allowing you to rest form changes quickly.
 
