@@ -1,4 +1,4 @@
-// content-script.js — Overlay with checkboxes and reload button
+// content-script.js — Overlay with checkboxes and reload button, styled properly
 
 const STYLE_ID = "d365-forms-tester-style";
 const OVERLAY_ID = "d365-forms-tester-overlay";
@@ -29,7 +29,8 @@ function ensureStyle() {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      min-width: 200px;
+      min-width: 220px;
+      align-items: flex-start;
     }
     #${OVERLAY_ID} label {
       display: flex;
@@ -41,8 +42,8 @@ function ensureStyle() {
       background-color: #262626;
       color: #fff;
       border: none;
-      border-radius: 6px;
-      padding: 6px 10px;
+      border-radius: 8px;
+      padding: 6px 12px;
       font-size: 12px;
       font-family: "Firesans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
       cursor: pointer;
@@ -84,7 +85,7 @@ function ensureOverlay() {
   reloadBtn.textContent = "Reload Form";
   reloadBtn.addEventListener("click", () => location.reload());
 
-  // Append all
+  // Append all elements
   overlay.appendChild(formDetectedLabel);
   overlay.appendChild(cacheDisabledLabel);
   overlay.appendChild(reloadBtn);
@@ -96,7 +97,6 @@ function ensureOverlay() {
 
 // Update checkboxes based on page state
 function updateOverlayCheckboxes(formCheckbox, cacheCheckbox) {
-  // Match any Dynamics 365 asset domain
   const dynamicsRegex = /^https:\/\/assets-[a-z]{3}\.mkt\.dynamics\.com\//i;
   const url = window.location.href;
 
@@ -110,10 +110,11 @@ function removeOverlay() {
   if (overlay) overlay.remove();
 }
 
-// Initialize
+// Initialize overlay
+ensureStyle();
 ensureOverlay();
 
-// Optional: hide overlay if toggles are off
+// Optional: hide overlay if both toggles are off
 chrome.storage.local.get(["highlightEnabled", "nocacheEnabled"], (data) => {
   if (!data.highlightEnabled && !data.nocacheEnabled) removeOverlay();
 });
