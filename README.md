@@ -1,15 +1,12 @@
 # dynamics-365-forms-edge-extension
 
-# Dynamics 365 Forms testing script — Edge Extension
+### Dynamics “No Cache” Toggle
+If you’re working with **Dynamics 365 Marketing assets**, this toggle automatically appends `#d365mkt-nocache` to any URL starting with:
 
-A simple **Microsoft Edge (Manifest V3)** extension that toggles a visual highlight on any webpage via popup.
+This is useful for bypassing cached asset previews or forcing fresh loads of scripts.
 
----
-
-## 🚀 Features
-
-
-
+- Enabled: Adds the fragment if not present.
+- Disabled: Removes it again.
 
 ---
 
