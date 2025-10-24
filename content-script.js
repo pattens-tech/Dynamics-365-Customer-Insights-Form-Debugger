@@ -1,4 +1,4 @@
-// content-script.js — Overlay with checkboxes and reload button, styled properly
+// content-script.js — Overlay with checkboxes and reload button
 
 const STYLE_ID = "d365-forms-tester-style";
 const OVERLAY_ID = "d365-forms-tester-overlay";
@@ -57,45 +57,45 @@ function ensureStyle() {
   document.head.appendChild(style);
 }
 
-// Add overlay element
+// Add overlay
 function ensureOverlay() {
   if (document.getElementById(OVERLAY_ID)) return;
 
   const overlay = document.createElement("div");
   overlay.id = OVERLAY_ID;
 
-  // Form detected checkbox
   const formDetectedLabel = document.createElement("label");
   const formDetectedCheckbox = document.createElement("input");
   formDetectedCheckbox.type = "checkbox";
-  formDetectedCheckbox.disabled = true; // read-only
+  formDetectedCheckbox.disabled = true;
   formDetectedLabel.appendChild(formDetectedCheckbox);
   formDetectedLabel.appendChild(document.createTextNode("Form detected"));
 
-  // Cache disabled checkbox
   const cacheDisabledLabel = document.createElement("label");
   const cacheDisabledCheckbox = document.createElement("input");
   cacheDisabledCheckbox.type = "checkbox";
-  cacheDisabledCheckbox.disabled = true; // read-only
+  cacheDisabledCheckbox.disabled = true;
   cacheDisabledLabel.appendChild(cacheDisabledCheckbox);
   cacheDisabledLabel.appendChild(document.createTextNode("Cache disabled"));
 
-  // Reload Form button
   const reloadBtn = document.createElement("button");
   reloadBtn.textContent = "Reload Form";
   reloadBtn.addEventListener("click", () => location.reload());
 
-  // Append all elements
   overlay.appendChild(formDetectedLabel);
   overlay.appendChild(cacheDisabledLabel);
   overlay.appendChild(reloadBtn);
   document.body.appendChild(overlay);
 
-  // Initialize checkbox state
   updateOverlayCheckboxes(formDetectedCheckbox, cacheDisabledCheckbox);
+
+  // Listen for storage changes to update overlay live
+  chrome.storage.onChanged.addListener(() => {
+    updateOverlayCheckboxes(formDetectedCheckbox, cacheDisabledCheckbox);
+  });
 }
 
-// Update checkboxes based on page state
+// Update overlay checkboxes
 function updateOverlayCheckboxes(formCheckbox, cacheCheckbox) {
   const dynamicsRegex = /^https:\/\/assets-[a-z]{3}\.mkt\.dynamics\.com\//i;
   const url = window.location.href;
@@ -104,17 +104,6 @@ function updateOverlayCheckboxes(formCheckbox, cacheCheckbox) {
   cacheCheckbox.checked = url.includes("#d365mkt-nocache");
 }
 
-// Remove overlay
-function removeOverlay() {
-  const overlay = document.getElementById(OVERLAY_ID);
-  if (overlay) overlay.remove();
-}
-
-// Initialize overlay
+// Initialize
 ensureStyle();
 ensureOverlay();
-
-// Optional: hide overlay if both toggles are off
-chrome.storage.local.get(["highlightEnabled", "nocacheEnabled"], (data) => {
-  if (!data.highlightEnabled && !data.nocacheEnabled) removeOverlay();
-});
