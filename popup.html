@@ -7,7 +7,7 @@
 <style>
   body {
     font-family: "Firesans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    background-color: #D2CABD;
+    background-color: #ffffff;
     color: #000;
     margin: 0;
     padding: 12px;
@@ -24,47 +24,13 @@
     transform: scale(1.1);
     cursor: pointer;
   }
-  button {
-    background-color: #262626;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-family: "Firesans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    font-size: 13px;
-    cursor: pointer;
-    width: 100%;
-  }
-  button:hover {
-    background-color: #444444;
-  }
-  .section {
-    margin-bottom: 8px;
-  }
 </style>
 </head>
 <body>
-  <div class="section">
-    <label>
-      <input type="checkbox" id="highlight-toggle">
-      Highlight elements
-    </label>
-    <label>
-      <input type="checkbox" id="nocache-toggle">
-      Disable Cache
-    </label>
-  </div>
-  <div class="section">
-    <label>
-      <input type="checkbox" id="form-detected" disabled>
-      Form detected
-    </label>
-    <label>
-      <input type="checkbox" id="cache-disabled" disabled>
-      Cache disabled
-    </label>
-  </div>
-  <button id="reload-btn">Reload Form</button>
+  <label>
+    <input type="checkbox" id="nocache-toggle">
+    Disable Cache
+  </label>
   <script src="popup.js"></script>
 </body>
 </html>
