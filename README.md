@@ -1,4 +1,4 @@
-# dynamics-365-forms-edge-extension
+# Dynamics 365 Form Tester
 
 ### Dynamics “No Cache” Toggle
 If you’re working with **Dynamics 365 Marketing assets**, this toggle automatically appends `#d365mkt-nocache` to any URL starting with:
