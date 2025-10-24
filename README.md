@@ -79,6 +79,6 @@ All references to Microsoft products are used for informational and compatibilit
 
 ---
 
-**Author:** Pattens Tech  
-**License:** MIT  
-**Version:** 1.0.0
+**Author:** Pattens Tech
+**License:** Apache 2.0
+**Version:** 1.0.1
