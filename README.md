@@ -45,6 +45,32 @@ All functionality (cache toggle, overlay display, and form checks) is performed 
 
 ---
 
+# Changelog
+
+## [1.0.1] - 2025-10-24
+
+### Added
+- Form detection via `[data-form-id]` attribute for embedded Dynamics 365 forms
+- Performance API monitoring to detect form API calls
+- Sticky bottom bar UI with form status and cache bypass indicators
+- Status badges: Form detection (green/red), Cache disabled (green/red)
+- Form metadata display: Full Form ID and field count
+- Mutation observer to track dynamically loaded form fields
+- Comprehensive console logging with color-coded output
+- Support for all URLs (`<all_urls>`) to detect embedded forms on any page
+- Reload Form button
+
+### Changed
+- Extended content script to run at `document_start` for early detection
+- Expanded host permissions to support embedded forms across all domains
+- Updated manifest to match all pages instead of just assets URLs
+
+### Technical Details
+- Form detection works on both direct asset pages and embedded forms
+- Cache bypass via `#d365mkt-nocache` URL hash toggle
+- Real-time field count updates via MutationObserver
+- CSP-compliant implementation (no eval, no inline scripts)
+
 ## Legal Notice
 
 **Dynamics 365** and **Microsoft Edge** are registered trademarks of **Microsoft Corporation**.  
