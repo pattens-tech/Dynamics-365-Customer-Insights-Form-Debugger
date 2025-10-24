@@ -1,39 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Mylo Toggle</title>
-    <style>
-      body {
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-        padding: 12px;
-        width: 220px;
-      }
-      label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-      }
-      input[type="checkbox"] {
-        transform: scale(1.2);
-      }
-    </style>
-  </head>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamics 365 Forms Tester</title>
+<style>
+  body {
+    font-family: "Firesans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background-color: #D2CABD;
+    color: #000;
+    margin: 0;
+    padding: 12px;
+    width: 220px;
+  }
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  input[type="checkbox"] {
+    transform: scale(1.1);
+    cursor: pointer;
+  }
+  button {
+    background-color: #262626;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: "Firesans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+  }
+  button:hover {
+    background-color: #444444;
+  }
+  .section {
+    margin-bottom: 8px;
+  }
+</style>
+</head>
 <body>
-  <h3>Edge Extension Tools</h3>
+  <div class="section">
+    <label>
+      <input type="checkbox" id="highlight-toggle">
+      Highlight elements
+    </label>
+    <label>
+      <input type="checkbox" id="nocache-toggle">
+      Disable Cache
+    </label>
+  </div>
+  <div class="section">
+    <label>
+      <input type="checkbox" id="form-detected" disabled>
+      Form detected
+    </label>
+    <label>
+      <input type="checkbox" id="cache-disabled" disabled>
+      Cache disabled
+    </label>
+  </div>
+  <button id="reload-btn">Reload Form</button>
 
-  <label>
-    <input id="toggleHighlight" type="checkbox" />
-    Highlight Page
-  </label>
-  <br />
-  <label>
-    <input id="toggleNoCache" type="checkbox" />
-    Add #d365mkt-nocache
-  </label>
-
-  <script type="module" src="popup.js"></script>
+  <script src="popup.js"></script>
 </body>
 </html>
