@@ -1,7 +1,6 @@
-// background.js — Edge Manifest V3 service worker (module)
+// background.js — Edge Manifest V3 service worker
 console.log("Service worker loaded");
 
-// Initialize default state on install
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({
     highlightEnabled: true,
@@ -9,15 +8,14 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-// Listen for messages from popup or content script
 chrome.runtime.onMessage.addListener((message, sender) => {
-
-  // Toggle page highlight class
+  // Toggle highlight class
   if (message?.type === "TOGGLE_CLASS") {
     chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-      if (!tabs[0]) return;
+      const tab = tabs[0];
+      if (!tab?.id) return;
       chrome.scripting.executeScript({
-        target: { tabId: tabs[0].id },
+        target: { tabId: tab.id },
         func: (className) => {
           document.documentElement.classList.toggle(className);
         },
@@ -26,32 +24,27 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     });
   }
 
-  // Toggle Dynamics 365 no-cache fragment
+  // Toggle no-cache fragment
   if (message?.type === "TOGGLE_NOCACHE") {
     chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       const tab = tabs[0];
-      if (!tab?.url) return;
+      if (!tab?.id || !tab.url) return;
 
-      // Match any regional Dynamics 365 asset domain (e.g., assets-eur, assets-gbr, assets-us)
       const dynamicsRegex = /^https:\/\/assets-[a-z]{3}\.mkt\.dynamics\.com\//i;
-      const currentUrl = tab.url;
-      const enabled = message.enabled;
+      const marker = "#d365mkt-nocache";
+      let newUrl = tab.url;
 
-      if (dynamicsRegex.test(currentUrl)) {
-        let newUrl = currentUrl;
-        const marker = "#d365mkt-nocache";
-
-        if (enabled && !currentUrl.includes(marker)) {
-          newUrl = currentUrl + marker;
-        } else if (!enabled && currentUrl.includes(marker)) {
-          newUrl = currentUrl.replace(marker, "");
+      if (dynamicsRegex.test(tab.url)) {
+        if (message.enabled && !tab.url.includes(marker)) {
+          newUrl = tab.url + marker;
+        } else if (!message.enabled && tab.url.includes(marker)) {
+          newUrl = tab.url.replace(marker, "");
         }
 
-        if (newUrl !== currentUrl) {
+        if (newUrl !== tab.url) {
           chrome.tabs.update(tab.id, { url: newUrl });
         }
       }
     });
   }
-
 });
