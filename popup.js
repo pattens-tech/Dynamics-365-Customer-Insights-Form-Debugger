@@ -1,19 +1,17 @@
-// popup.js
-
 const highlightToggle = document.getElementById("highlight-toggle");
 const nocacheToggle = document.getElementById("nocache-toggle");
 const formDetectedCheckbox = document.getElementById("form-detected");
 const cacheDisabledCheckbox = document.getElementById("cache-disabled");
 const reloadBtn = document.getElementById("reload-btn");
 
-// Initialize toggle states from storage
+// Load toggle state
 chrome.storage.local.get(["highlightEnabled", "nocacheEnabled"], (data) => {
   highlightToggle.checked = data.highlightEnabled ?? true;
   nocacheToggle.checked = data.nocacheEnabled ?? false;
   updateOverlayCheckboxes();
 });
 
-// Send message to background script when toggles change
+// Highlight toggle
 highlightToggle.addEventListener("change", () => {
   const enabled = highlightToggle.checked;
   chrome.storage.local.set({ highlightEnabled: enabled });
@@ -21,6 +19,7 @@ highlightToggle.addEventListener("change", () => {
   updateOverlayCheckboxes();
 });
 
+// No-cache toggle
 nocacheToggle.addEventListener("change", () => {
   const enabled = nocacheToggle.checked;
   chrome.storage.local.set({ nocacheEnabled: enabled });
@@ -35,7 +34,7 @@ reloadBtn.addEventListener("click", () => {
   });
 });
 
-// Update the form detected / cache disabled checkboxes
+// Update checkboxes to reflect page state
 function updateOverlayCheckboxes() {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const url = tabs[0]?.url || "";
