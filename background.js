@@ -1,13 +1,14 @@
 // background.js — append #d365mkt-nocache only for Dynamics 365 form URLs
 
-import { PATTERNS, CACHE_BYPASS, STORAGE_KEYS, DEFAULTS, MESSAGE_TYPES } from './config.js';
+// Import config.js into the service worker
+importScripts('config.js');
 
 /**
  * Regular expression to match Dynamics 365 Marketing form asset URLs.
  * Matches URLs like: https://assets-gbr.mkt.dynamics.com/...
  * @type {RegExp}
  */
-const dynamicsRegex = PATTERNS.DYNAMICS_URL;
+const dynamicsRegex = CONFIG.PATTERNS.DYNAMICS_URL;
 
 /**
  * Listens for tab URL updates and applies cache bypass for Dynamics 365 form pages.
@@ -24,7 +25,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
  * Responds to TOGGLE_NOCACHE messages and applies changes to Dynamics 365 tabs.
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === MESSAGE_TYPES.TOGGLE_NOCACHE) {
+  if (message.type === CONFIG.MESSAGE_TYPES.TOGGLE_NOCACHE) {
     if (sender.tab && dynamicsRegex.test(sender.tab.url)) {
       applyNoCache(sender.tab.id, sender.tab.url, message.enabled);
     }
@@ -42,21 +43,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  * @returns {void}
  */
 function applyNoCache(tabId, url, forceEnabled = null) {
-  chrome.storage.local.get([STORAGE_KEYS.NOCACHE_ENABLED], (data) => {
+  chrome.storage.local.get([CONFIG.STORAGE_KEYS.NOCACHE_ENABLED], (data) => {
     if (chrome.runtime.lastError) {
       console.error('[D365 Form Tester] Error reading storage in background:', chrome.runtime.lastError);
       return;
     }
 
-    const enabled = forceEnabled !== null ? forceEnabled : (data[STORAGE_KEYS.NOCACHE_ENABLED] ?? DEFAULTS.NOCACHE_ENABLED);
+    const enabled = forceEnabled !== null ? forceEnabled : (data[CONFIG.STORAGE_KEYS.NOCACHE_ENABLED] ?? CONFIG.DEFAULTS.NOCACHE_ENABLED);
 
     let newUrl = url;
 
     // Only append if not already present
-    if (enabled && !url.includes(CACHE_BYPASS.URL_HASH)) {
-      newUrl = url + CACHE_BYPASS.URL_HASH;
-    } else if (!enabled && url.includes(CACHE_BYPASS.URL_HASH)) {
-      newUrl = url.replace(CACHE_BYPASS.URL_HASH, "");
+    if (enabled && !url.includes(CONFIG.CACHE_BYPASS.URL_HASH)) {
+      newUrl = url + CONFIG.CACHE_BYPASS.URL_HASH;
+    } else if (!enabled && url.includes(CONFIG.CACHE_BYPASS.URL_HASH)) {
+      newUrl = url.replace(CONFIG.CACHE_BYPASS.URL_HASH, "");
     }
 
     if (newUrl !== url) {

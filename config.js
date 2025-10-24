@@ -4,13 +4,19 @@
  * This file contains all constants, magic numbers, and configuration values used
  * throughout the extension. Centralizing these values makes the code more maintainable
  * and easier to modify.
+ *
+ * Note: This file uses a global CONFIG object instead of ES6 exports because content
+ * scripts cannot use ES6 modules in browser extensions.
  */
+
+// Define all configuration in a global CONFIG object
+const CONFIG = {};
 
 /**
  * DOM element IDs used throughout the extension
  * @const {Object}
  */
-export const ELEMENT_IDS = {
+CONFIG.ELEMENT_IDS = {
   STYLE: "d365-forms-tester-style",
   OVERLAY: "d365-forms-tester-overlay",
   FORM_BADGE: "form-badge",
@@ -22,7 +28,7 @@ export const ELEMENT_IDS = {
  * Timeout values in milliseconds
  * @const {Object}
  */
-export const TIMEOUTS = {
+CONFIG.TIMEOUTS = {
   /** Retry delay when waiting for DOM elements to be available */
   DOM_RETRY: 100
 };
@@ -31,7 +37,7 @@ export const TIMEOUTS = {
  * UI styling constants
  * @const {Object}
  */
-export const STYLES = {
+CONFIG.STYLES = {
   /** Z-index for overlay to ensure it appears above all other page content */
   OVERLAY_Z_INDEX: 999999
 };
@@ -40,7 +46,7 @@ export const STYLES = {
  * Color palette used for console logging and UI elements
  * @const {Object}
  */
-export const COLORS = {
+CONFIG.COLORS = {
   /** Primary brand color (orange) */
   BRAND: "#FF6B35",
   /** Success state (green) */
@@ -63,7 +69,7 @@ export const COLORS = {
  * Console logging configuration
  * @const {Object}
  */
-export const LOGGING = {
+CONFIG.LOGGING = {
   /** Prefix for all console log messages */
   PREFIX: "%c[D365 Form Tester]",
   /** CSS style for the log prefix */
@@ -74,7 +80,7 @@ export const LOGGING = {
  * Regular expression patterns
  * @const {Object}
  */
-export const PATTERNS = {
+CONFIG.PATTERNS = {
   /**
    * Matches Dynamics 365 Marketing form asset URLs
    * Examples: https://assets-gbr.mkt.dynamics.com/...
@@ -87,7 +93,7 @@ export const PATTERNS = {
  * Cache bypass configuration
  * @const {Object}
  */
-export const CACHE_BYPASS = {
+CONFIG.CACHE_BYPASS = {
   /** URL hash used to disable Dynamics 365 form caching */
   URL_HASH: "#d365mkt-nocache"
 };
@@ -96,7 +102,7 @@ export const CACHE_BYPASS = {
  * Storage keys used in chrome.storage.local
  * @const {Object}
  */
-export const STORAGE_KEYS = {
+CONFIG.STORAGE_KEYS = {
   /** Key for storing the cache bypass enabled/disabled preference */
   NOCACHE_ENABLED: "nocacheEnabled"
 };
@@ -105,7 +111,7 @@ export const STORAGE_KEYS = {
  * DOM selectors used for form detection
  * @const {Object}
  */
-export const SELECTORS = {
+CONFIG.SELECTORS = {
   /** Attribute selector for Dynamics 365 form containers */
   FORM_CONTAINER: "[data-form-id]",
   /** All script tags with src attributes */
@@ -116,7 +122,7 @@ export const SELECTORS = {
  * Message types for inter-component communication
  * @const {Object}
  */
-export const MESSAGE_TYPES = {
+CONFIG.MESSAGE_TYPES = {
   /** Message sent from popup to background to toggle cache bypass */
   TOGGLE_NOCACHE: "TOGGLE_NOCACHE"
 };
@@ -125,7 +131,18 @@ export const MESSAGE_TYPES = {
  * Default values
  * @const {Object}
  */
-export const DEFAULTS = {
+CONFIG.DEFAULTS = {
   /** Default state for cache bypass (enabled by default) */
   NOCACHE_ENABLED: true
 };
+
+// Make CONFIG available globally (for content scripts)
+// and also export it for modules (background.js, popup.js)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = CONFIG;
+}
+
+// For ES6 modules (background.js with type="module")
+if (typeof window !== 'undefined') {
+  window.CONFIG = CONFIG;
+}
