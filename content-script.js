@@ -1,12 +1,28 @@
 // content-script.js — Overlay with checkboxes and reload button
 
-const STYLE_ID = "d365-forms-tester-style";
-const OVERLAY_ID = "d365-forms-tester-overlay";
+import {
+  ELEMENT_IDS,
+  TIMEOUTS,
+  STYLES,
+  COLORS,
+  LOGGING,
+  CACHE_BYPASS,
+  SELECTORS
+} from './config.js';
 
-// Check for Dynamics form in Network tab (limited but CSP-compliant)
+const STYLE_ID = ELEMENT_IDS.STYLE;
+const OVERLAY_ID = ELEMENT_IDS.OVERLAY;
+
+/**
+ * Monitors network requests for Dynamics 365 form API calls using PerformanceObserver.
+ * Logs form API detections to console with color-coded output.
+ * This is a CSP-compliant alternative to intercepting network requests.
+ *
+ * @returns {void}
+ */
 function detectNetworkRequests() {
-  const LOG_PREFIX = '%c[D365 Form Tester]';
-  const LOG_STYLE = 'color: #FF6B35; font-weight: bold;';
+  const LOG_PREFIX = LOGGING.PREFIX;
+  const LOG_STYLE = LOGGING.PREFIX_STYLE;
   
   // Monitor for form API calls via PerformanceObserver if available
   if (window.PerformanceObserver) {
@@ -14,29 +30,48 @@ function detectNetworkRequests() {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           if (entry.name && entry.name.includes('landingpageforms')) {
-            console.log(LOG_PREFIX + ' %cForm API detected via performance:', LOG_STYLE, 'color: #2196F3;', entry.name);
+            console.log(LOG_PREFIX + ' %cForm API detected via performance:', LOG_STYLE, `color: ${COLORS.INFO};`, entry.name);
           }
         }
       });
       observer.observe({ entryTypes: ['resource'] });
-      console.log(LOG_PREFIX + ' %cPerformance observer monitoring enabled', LOG_STYLE, 'color: #4CAF50;');
+      console.log(LOG_PREFIX + ' %cPerformance observer monitoring enabled', LOG_STYLE, `color: ${COLORS.SUCCESS};`);
     } catch (e) {
-      console.log(LOG_PREFIX + ' %cPerformance observer not available', LOG_STYLE, 'color: #FF9800;');
+      console.log(LOG_PREFIX + ' %cPerformance observer not available:', LOG_STYLE, `color: ${COLORS.NOTICE};`, e.message);
     }
   }
 }
 
-// Detect Dynamics 365 form container and log scripts
+/**
+ * Scans the DOM for Dynamics 365 form containers and extracts metadata.
+ * Looks for elements with [data-form-id] attribute and retrieves form information.
+ * Also identifies form-related scripts and cache bypass methods.
+ *
+ * @returns {Object} Form state object containing detection results and metadata
+ * @returns {boolean} return.found - Whether a Dynamics 365 form was detected on the page
+ * @returns {string} [return.formId] - The unique form identifier from data-form-id attribute
+ * @returns {string} [return.apiUrl] - The form API URL from data-form-api-url attribute
+ * @returns {string} [return.cachedUrl] - The cached form URL if available
+ * @returns {number} [return.fieldCount] - Number of form fields currently loaded
+ * @returns {Array<string>} [return.relatedScripts] - URLs of form-related JavaScript files
+ * @returns {Object} [return.cacheBypassMethods] - Object indicating active cache bypass methods
+ */
 function detectDynamicsForm() {
-  const LOG_PREFIX = '%c[D365 Form Tester]';
-  const LOG_STYLE = 'color: #FF6B35; font-weight: bold;';
-  
-  console.log(LOG_PREFIX + ' %cScanning page for form...', LOG_STYLE, 'color: #FFC107;');
-  
-  const formContainer = document.querySelector('[data-form-id]');
-  
+  const LOG_PREFIX = LOGGING.PREFIX;
+  const LOG_STYLE = LOGGING.PREFIX_STYLE;
+
+  console.log(LOG_PREFIX + ' %cScanning page for form...', LOG_STYLE, `color: ${COLORS.WARNING};`);
+
+  let formContainer;
+  try {
+    formContainer = document.querySelector(SELECTORS.FORM_CONTAINER);
+  } catch (e) {
+    console.error(LOG_PREFIX + ' %cError querying for form container:', LOG_STYLE, `color: ${COLORS.ERROR};`, e);
+    return { found: false, error: e.message };
+  }
+
   if (formContainer) {
-    console.log(LOG_PREFIX + ' %c✓ FORM DETECTED', LOG_STYLE, 'color: #4CAF50; font-size: 14px;');
+    console.log(LOG_PREFIX + ' %c✓ FORM DETECTED', LOG_STYLE, `color: ${COLORS.SUCCESS}; font-size: 14px;`);
     
     const formData = {
       formId: formContainer.getAttribute('data-form-id'),
@@ -44,24 +79,24 @@ function detectDynamicsForm() {
       cachedUrl: formContainer.getAttribute('data-cached-form-url')
     };
     
-    console.log(LOG_PREFIX + ' %cForm ID:', LOG_STYLE, 'color: #2196F3;', formData.formId);
-    console.log(LOG_PREFIX + ' %cAPI URL:', LOG_STYLE, 'color: #2196F3;', formData.apiUrl);
+    console.log(LOG_PREFIX + ' %cForm ID:', LOG_STYLE, `color: ${COLORS.INFO};`, formData.formId);
+    console.log(LOG_PREFIX + ' %cAPI URL:', LOG_STYLE, `color: ${COLORS.INFO};`, formData.apiUrl);
 
     // Log all scripts on the page, filtering for form-related ones
-    const allScripts = Array.from(document.querySelectorAll('script[src]')).map(s => s.src);
+    const allScripts = Array.from(document.querySelectorAll(SELECTORS.SCRIPTS)).map(s => s.src);
     const relatedScripts = allScripts.filter(src => 
       src.includes('dynamics') || src.includes('form') || src.includes('mkt') || src.includes('forms')
     );
     
-    console.log(LOG_PREFIX + ' %cTotal scripts loaded:', LOG_STYLE, 'color: #9C27B0;', allScripts.length);
+    console.log(LOG_PREFIX + ' %cTotal scripts loaded:', LOG_STYLE, `color: ${COLORS.PURPLE};`, allScripts.length);
     if (relatedScripts.length > 0) {
-      console.log(LOG_PREFIX + ' %cRelated scripts:', LOG_STYLE, 'color: #9C27B0;', relatedScripts);
+      console.log(LOG_PREFIX + ' %cRelated scripts:', LOG_STYLE, `color: ${COLORS.PURPLE};`, relatedScripts);
     }
 
     // Detect cache-busting methods in use
     const url = window.location.href;
     const cacheBypassMethods = {
-      urlHash: url.includes('#d365mkt-nocache'),
+      urlHash: url.includes(CACHE_BYPASS.URL_HASH),
       apiParameter: false
     };
 
@@ -76,25 +111,32 @@ function detectDynamicsForm() {
       allScripts: allScripts.length
     };
 
-    console.log(LOG_PREFIX + ' %cForm fields detected:', LOG_STYLE, 'color: #00BCD4;', formState.fieldCount);
+    console.log(LOG_PREFIX + ' %cForm fields detected:', LOG_STYLE, `color: ${COLORS.CYAN};`, formState.fieldCount);
     return formState;
   }
-  
-  console.log(LOG_PREFIX + ' %c✗ NO FORM DETECTED', LOG_STYLE, 'color: #F44336; font-size: 14px;');
-  console.log(LOG_PREFIX + ' %cLooking for: [data-form-id] attribute', LOG_STYLE, 'color: #FF9800;');
+
+  console.log(LOG_PREFIX + ' %c✗ NO FORM DETECTED', LOG_STYLE, `color: ${COLORS.ERROR}; font-size: 14px;`);
+  console.log(LOG_PREFIX + ' %cLooking for: [data-form-id] attribute', LOG_STYLE, `color: ${COLORS.NOTICE};`);
   return { found: false };
 }
 
-
-
-// Monitor when form fields are added dynamically
+/**
+ * Sets up a MutationObserver to monitor dynamic changes to form fields.
+ * Watches for child elements being added to the form container and logs field count updates.
+ * Triggers overlay UI updates when the field count changes.
+ *
+ * Note: Only observes direct children (subtree: false) to avoid performance overhead
+ * from monitoring all descendant changes in the form tree.
+ *
+ * @returns {void}
+ */
 function monitorFormMutations() {
-  const formContainer = document.querySelector('[data-form-id]');
-  const LOG_PREFIX = '%c[D365 Form Tester]';
-  const LOG_STYLE = 'color: #FF6B35; font-weight: bold;';
+  const formContainer = document.querySelector(SELECTORS.FORM_CONTAINER);
+  const LOG_PREFIX = LOGGING.PREFIX;
+  const LOG_STYLE = LOGGING.PREFIX_STYLE;
   
   if (!formContainer) {
-    console.log(LOG_PREFIX + ' %cNo form to monitor for mutations', LOG_STYLE, 'color: #FF9800;');
+    console.log(LOG_PREFIX + ' %cNo form to monitor for mutations', LOG_STYLE, `color: ${COLORS.NOTICE};`);
     return;
   }
 
@@ -105,15 +147,21 @@ function monitorFormMutations() {
     
     // Only log if count actually changed
     if (currentFieldCount !== lastFieldCount) {
-      console.log(LOG_PREFIX + ' %cForm fields updated: ' + lastFieldCount + ' → ' + currentFieldCount, LOG_STYLE, 'color: #00BCD4;');
+      console.log(LOG_PREFIX + ' %cForm fields updated: ' + lastFieldCount + ' → ' + currentFieldCount, LOG_STYLE, `color: ${COLORS.CYAN};`);
       lastFieldCount = currentFieldCount;
       
       // Trigger overlay update
-      const formInfoDiv = document.querySelector('#' + OVERLAY_ID + ' .form-info');
-      if (formInfoDiv) {
-        const cacheCheckbox = document.querySelector('#' + OVERLAY_ID + ' input[type="checkbox"]:nth-of-type(1)');
-        const embeddedCheckbox = document.querySelector('#' + OVERLAY_ID + ' input[type="checkbox"]:nth-of-type(2)');
-        updateOverlayCheckboxes(cacheCheckbox, embeddedCheckbox, formInfoDiv);
+      try {
+        const formInfoDiv = document.querySelector('#' + OVERLAY_ID + ' .form-info');
+        if (formInfoDiv) {
+          const formBadge = document.getElementById(ELEMENT_IDS.FORM_BADGE);
+          const cacheBadge = document.getElementById(ELEMENT_IDS.CACHE_BADGE);
+          if (formBadge && cacheBadge) {
+            updateOverlayStatus(formBadge, cacheBadge, formInfoDiv);
+          }
+        }
+      } catch (e) {
+        console.error(LOG_PREFIX + ' %cError updating overlay:', LOG_STYLE, `color: ${COLORS.ERROR};`, e);
       }
     }
   });
@@ -122,11 +170,24 @@ function monitorFormMutations() {
     childList: true, 
     subtree: false // Don't observe deep - just direct children
   });
-  
-  console.log(LOG_PREFIX + ' %cMutation observer active', LOG_STYLE, 'color: #4CAF50;');
+
+  console.log(LOG_PREFIX + ' %cMutation observer active', LOG_STYLE, `color: ${COLORS.SUCCESS};`);
 }
 
-// Inject styles
+/**
+ * Injects CSS styles for the overlay UI into the document head.
+ * Creates a style element only if it doesn't already exist.
+ * Retries after 100ms if the document head is not yet available.
+ *
+ * Styles include:
+ * - Form highlight effects
+ * - Fixed bottom overlay bar
+ * - Status badges (active/inactive/neutral states)
+ * - Form info display
+ * - Reload button
+ *
+ * @returns {void}
+ */
 function ensureStyle() {
   if (document.getElementById(STYLE_ID)) return;
   
@@ -134,7 +195,7 @@ function ensureStyle() {
   const head = document.head || document.documentElement;
   if (!head) {
     // Retry later if head isn't ready
-    setTimeout(ensureStyle, 100);
+    setTimeout(ensureStyle, TIMEOUTS.DOM_RETRY);
     return;
   }
   
@@ -156,7 +217,7 @@ function ensureStyle() {
       font-size: 14px;
       font-family: "Firesans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
       box-shadow: 0 -2px 8px rgba(0,0,0,0.15);
-      z-index: 999999;
+      z-index: ${STYLES.OVERLAY_Z_INDEX};
       pointer-events: auto;
       display: flex;
       flex-direction: row;
@@ -214,13 +275,28 @@ function ensureStyle() {
   head.appendChild(style);
 }
 
-// Add overlay
+/**
+ * Creates and injects the diagnostic overlay UI at the bottom of the page.
+ * The overlay displays form detection status, cache status, form metadata, and a reload button.
+ * Only creates the overlay if it doesn't already exist.
+ * Retries after 100ms if document.body is not yet available.
+ *
+ * Components created:
+ * - Form detected badge (shows if form is found)
+ * - Cache status badge (shows if cache is disabled)
+ * - Form info div (displays form ID and field count)
+ * - Reload button (triggers page reload)
+ *
+ * Also sets up a listener for storage changes to update the overlay in real-time.
+ *
+ * @returns {void}
+ */
 function ensureOverlay() {
   if (document.getElementById(OVERLAY_ID)) return;
-  
+
   // Wait for body to be available
   if (!document.body) {
-    setTimeout(ensureOverlay, 100);
+    setTimeout(ensureOverlay, TIMEOUTS.DOM_RETRY);
     return;
   }
 
@@ -230,19 +306,19 @@ function ensureOverlay() {
   // Form detected badge
   const formBadge = document.createElement("div");
   formBadge.className = "status-badge neutral";
-  formBadge.id = "form-badge";
+  formBadge.id = ELEMENT_IDS.FORM_BADGE;
   formBadge.textContent = "○ Form detected";
 
   // Cache status badge
   const cacheBadge = document.createElement("div");
   cacheBadge.className = "status-badge inactive";
-  cacheBadge.id = "cache-badge";
+  cacheBadge.id = ELEMENT_IDS.CACHE_BADGE;
   cacheBadge.textContent = "Cache enabled";
 
   // Form info div
   const formInfoDiv = document.createElement("div");
   formInfoDiv.className = "form-info";
-  formInfoDiv.id = "form-info";
+  formInfoDiv.id = ELEMENT_IDS.FORM_INFO;
 
   // Reload button
   const reloadBtn = document.createElement("button");
@@ -259,21 +335,41 @@ function ensureOverlay() {
 
   // Listen for storage changes to update overlay live
   chrome.storage.onChanged.addListener(() => {
-    const formBadge = document.getElementById("form-badge");
-    const cacheBadge = document.getElementById("cache-badge");
-    const formInfoDiv = document.getElementById("form-info");
-    updateOverlayStatus(formBadge, cacheBadge, formInfoDiv);
+    try {
+      const formBadge = document.getElementById(ELEMENT_IDS.FORM_BADGE);
+      const cacheBadge = document.getElementById(ELEMENT_IDS.CACHE_BADGE);
+      const formInfoDiv = document.getElementById(ELEMENT_IDS.FORM_INFO);
+      if (formBadge && cacheBadge && formInfoDiv) {
+        updateOverlayStatus(formBadge, cacheBadge, formInfoDiv);
+      }
+    } catch (e) {
+      console.error('[D365 Form Tester] Error in storage change handler:', e);
+    }
   });
 }
 
-// Update overlay status badges and form info
+/**
+ * Updates the overlay UI elements based on current page state.
+ * Checks for cache bypass in URL, detects form presence, and updates all status indicators.
+ *
+ * @param {HTMLElement} formBadge - The badge element showing form detection status
+ * @param {HTMLElement} cacheBadge - The badge element showing cache bypass status
+ * @param {HTMLElement} formInfoDiv - The div element displaying form metadata
+ * @returns {void}
+ */
 function updateOverlayStatus(formBadge, cacheBadge, formInfoDiv) {
-  const LOG_PREFIX = '%c[D365 Form Tester]';
-  const LOG_STYLE = 'color: #FF6B35; font-weight: bold;';
-  
+  const LOG_PREFIX = LOGGING.PREFIX;
+  const LOG_STYLE = LOGGING.PREFIX_STYLE;
+
+  // Validate required parameters
+  if (!formBadge || !cacheBadge || !formInfoDiv) {
+    console.warn(LOG_PREFIX + ' %cMissing required overlay elements', LOG_STYLE, `color: ${COLORS.WARNING};`);
+    return;
+  }
+
   const url = window.location.href;
-  const hasCacheBypass = url.includes("#d365mkt-nocache");
-  
+  const hasCacheBypass = url.includes(CACHE_BYPASS.URL_HASH);
+
   // Check if form is embedded on this page
   const formState = detectDynamicsForm();
   const isEmbeddedForm = formState.found;
@@ -300,7 +396,7 @@ function updateOverlayStatus(formBadge, cacheBadge, formInfoDiv) {
     }
   }
 
-  console.log(LOG_PREFIX + ' %cStates - Cache: ' + hasCacheBypass + ', Embedded: ' + isEmbeddedForm, LOG_STYLE, 'color: #2196F3;');
+  console.log(LOG_PREFIX + ' %cStates - Cache: ' + hasCacheBypass + ', Embedded: ' + isEmbeddedForm, LOG_STYLE, `color: ${COLORS.INFO};`);
 
   // Display form info
   const stats = window.__d365FormTesterStats || {};
@@ -316,21 +412,21 @@ function updateOverlayStatus(formBadge, cacheBadge, formInfoDiv) {
 }
 
 // Initialize - wait for DOM to be ready
-console.log('%c[D365 Form Tester] %cExtension loaded!', 'color: #FF6B35; font-weight: bold;', 'color: #4CAF50;');
+console.log(LOGGING.PREFIX + ' %cExtension loaded!', LOGGING.PREFIX_STYLE, `color: ${COLORS.SUCCESS};`);
 detectNetworkRequests();
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     ensureStyle();
     ensureOverlay();
-    console.log('%c[D365 Form Tester] %cOverlay and styles initialized', 'color: #FF6B35; font-weight: bold;', 'color: #4CAF50;');
+    console.log(LOGGING.PREFIX + ' %cOverlay and styles initialized', LOGGING.PREFIX_STYLE, `color: ${COLORS.SUCCESS};`);
     monitorFormMutations();
     detectDynamicsForm();
   });
 } else {
   ensureStyle();
   ensureOverlay();
-  console.log('%c[D365 Form Tester] %cOverlay and styles initialized', 'color: #FF6B35; font-weight: bold;', 'color: #4CAF50;');
+  console.log(LOGGING.PREFIX + ' %cOverlay and styles initialized', LOGGING.PREFIX_STYLE, `color: ${COLORS.SUCCESS};`);
   monitorFormMutations();
   detectDynamicsForm();
 }
