@@ -2,7 +2,7 @@
 
 ### Dynamics Forms “No Cache” Toggle
 
-If you’re working with **Dynamics 365 Customer Insights Forms**, this extension automatically block the cache, allowing you to rest form changes quickly.
+If you’re working with **Dynamics 365 Customer Insights Forms**, this extension temporarily disables the form cache, allowing you to rest form changes quickly.
 
 Test, debug, and validate **Dynamics 365 forms** directly in **Microsoft Edge / Chrome**.
 
