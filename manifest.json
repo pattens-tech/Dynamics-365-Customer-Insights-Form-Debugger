@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Dynamics 365 Forms,
+  "name": "Dynamics 365 Forms Tester",
   "description": "Removes the cache from Dynamics 365 forms for testing",
   "version": "1.0.0",
   "action": {
