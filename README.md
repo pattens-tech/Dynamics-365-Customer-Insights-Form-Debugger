@@ -4,7 +4,7 @@
 
 If you’re working with **Dynamics 365 Marketing assets**, this extension automatically appends `#d365mkt-nocache` to any URL starting with your Dynamics form endpoint (for example: `https://assets-gbr.mkt.dynamics.com`).
 
-Test, debug, and validate **Dynamics 365 forms** directly in **Microsoft Edge**.
+Test, debug, and validate **Dynamics 365 forms** directly in **Microsoft Edge / Chrome**.
 
 ---
 
