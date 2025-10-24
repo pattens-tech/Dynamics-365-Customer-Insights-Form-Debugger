@@ -1,7 +1,5 @@
 # Dynamics 365 Form Tester
 
-### Dynamics Forms “No Cache” Toggle
-
 Temporarily disables **Dynamics 365 Customer Insights Forms** cache, allowing you to rest form changes quickly.
 
 Test, debug, and validate **Dynamics 365 forms** directly in **Microsoft Edge / Chrome**.
