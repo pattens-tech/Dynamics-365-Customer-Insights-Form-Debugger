@@ -1,5 +1,7 @@
 # Dynamics 365 Form Tester
 
+![image](https://repository-images.githubusercontent.com/1082111680/671a8db4-7243-45e4-9a30-f3332bd3a4d0)
+
 Temporarily disables **Dynamics 365 Customer Insights Forms** cache, allowing you to rest form changes quickly.
 
 Test, debug, and validate **Dynamics 365 forms** directly in **Microsoft Edge / Chrome**.
