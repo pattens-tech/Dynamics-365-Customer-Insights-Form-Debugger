@@ -1,4 +1,4 @@
-// content-script.js — Overlay for Dynamics 365 Forms Tester
+// content-script.js — Overlay with checkboxes and reload button
 
 const STYLE_ID = "d365-forms-tester-style";
 const OVERLAY_ID = "d365-forms-tester-overlay";
@@ -19,7 +19,7 @@ function ensureStyle() {
       right: 12px;
       background: #D2CABD;
       color: #000;
-      padding: 10px 16px;
+      padding: 12px 16px;
       font-size: 14px;
       font-family: "Firesans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
       border-radius: 8px;
@@ -27,19 +27,27 @@ function ensureStyle() {
       z-index: 999999;
       pointer-events: auto;
       display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 200px;
+    }
+    #${OVERLAY_ID} label {
+      display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
+      font-size: 13px;
     }
     #${OVERLAY_ID} button {
       background-color: #262626;
       color: #fff;
       border: none;
       border-radius: 6px;
-      padding: 4px 10px;
+      padding: 6px 10px;
       font-size: 12px;
       font-family: "Firesans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
       cursor: pointer;
       transition: background 120ms ease-in-out;
+      align-self: flex-start;
     }
     #${OVERLAY_ID} button:hover {
       background-color: #444444;
@@ -55,16 +63,45 @@ function ensureOverlay() {
   const overlay = document.createElement("div");
   overlay.id = OVERLAY_ID;
 
-  const text = document.createElement("span");
-  text.textContent = "Dynamics 365 Forms Tester active on this page";
+  // Form detected checkbox
+  const formDetectedLabel = document.createElement("label");
+  const formDetectedCheckbox = document.createElement("input");
+  formDetectedCheckbox.type = "checkbox";
+  formDetectedCheckbox.disabled = true; // read-only
+  formDetectedLabel.appendChild(formDetectedCheckbox);
+  formDetectedLabel.appendChild(document.createTextNode("Form detected"));
 
+  // Cache disabled checkbox
+  const cacheDisabledLabel = document.createElement("label");
+  const cacheDisabledCheckbox = document.createElement("input");
+  cacheDisabledCheckbox.type = "checkbox";
+  cacheDisabledCheckbox.disabled = true; // read-only
+  cacheDisabledLabel.appendChild(cacheDisabledCheckbox);
+  cacheDisabledLabel.appendChild(document.createTextNode("Cache disabled"));
+
+  // Reload Form button
   const reloadBtn = document.createElement("button");
   reloadBtn.textContent = "Reload Form";
   reloadBtn.addEventListener("click", () => location.reload());
 
-  overlay.appendChild(text);
+  // Append all
+  overlay.appendChild(formDetectedLabel);
+  overlay.appendChild(cacheDisabledLabel);
   overlay.appendChild(reloadBtn);
   document.body.appendChild(overlay);
+
+  // Initialize checkbox state
+  updateOverlayCheckboxes(formDetectedCheckbox, cacheDisabledCheckbox);
+}
+
+// Update checkboxes based on page state
+function updateOverlayCheckboxes(formCheckbox, cacheCheckbox) {
+  // Match any Dynamics 365 asset domain
+  const dynamicsRegex = /^https:\/\/assets-[a-z]{3}\.mkt\.dynamics\.com\//i;
+  const url = window.location.href;
+
+  formCheckbox.checked = dynamicsRegex.test(url);
+  cacheCheckbox.checked = url.includes("#d365mkt-nocache");
 }
 
 // Remove overlay
@@ -74,10 +111,9 @@ function removeOverlay() {
 }
 
 // Initialize
-ensureStyle();
 ensureOverlay();
 
-// Optionally hide overlay if toggle is off
+// Optional: hide overlay if toggles are off
 chrome.storage.local.get(["highlightEnabled", "nocacheEnabled"], (data) => {
   if (!data.highlightEnabled && !data.nocacheEnabled) removeOverlay();
 });
