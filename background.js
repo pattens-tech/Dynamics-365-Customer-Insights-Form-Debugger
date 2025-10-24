@@ -1,50 +1,39 @@
-// background.js — Edge Manifest V3 service worker
-console.log("Service worker loaded");
+// background.js — append #d365mkt-nocache only for Dynamics 365 form URLs
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.set({
-    highlightEnabled: true,
-    nocacheEnabled: false
+const dynamicsRegex = /^https:\/\/assets-[a-z]{3}\.mkt\.dynamics\.com\//i;
+
+// Listen for tab updates
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.url && dynamicsRegex.test(changeInfo.url)) {
+    applyNoCache(tabId, changeInfo.url);
+  }
+});
+
+// Listen for messages from popup toggle
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "TOGGLE_NOCACHE") {
+    if (sender.tab && dynamicsRegex.test(sender.tab.url)) {
+      applyNoCache(sender.tab.id, sender.tab.url, message.enabled);
+    }
+  }
+});
+
+// Apply or remove #d365mkt-nocache
+function applyNoCache(tabId, url, forceEnabled = null) {
+  chrome.storage.local.get(["nocacheEnabled"], (data) => {
+    const enabled = forceEnabled !== null ? forceEnabled : (data.nocacheEnabled ?? true);
+
+    let newUrl = url;
+
+    // Only append if not already present
+    if (enabled && !url.includes("#d365mkt-nocache")) {
+      newUrl = url + "#d365mkt-nocache";
+    } else if (!enabled && url.includes("#d365mkt-nocache")) {
+      newUrl = url.replace("#d365mkt-nocache", "");
+    }
+
+    if (newUrl !== url) {
+      chrome.tabs.update(tabId, { url: newUrl });
+    }
   });
-});
-
-chrome.runtime.onMessage.addListener((message, sender) => {
-  // Toggle highlight class
-  if (message?.type === "TOGGLE_CLASS") {
-    chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-      const tab = tabs[0];
-      if (!tab?.id) return;
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: (className) => {
-          document.documentElement.classList.toggle(className);
-        },
-        args: [message.className],
-      });
-    });
-  }
-
-  // Toggle no-cache fragment
-  if (message?.type === "TOGGLE_NOCACHE") {
-    chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-      const tab = tabs[0];
-      if (!tab?.id || !tab.url) return;
-
-      const dynamicsRegex = /^https:\/\/assets-[a-z]{3}\.mkt\.dynamics\.com\//i;
-      const marker = "#d365mkt-nocache";
-      let newUrl = tab.url;
-
-      if (dynamicsRegex.test(tab.url)) {
-        if (message.enabled && !tab.url.includes(marker)) {
-          newUrl = tab.url + marker;
-        } else if (!message.enabled && tab.url.includes(marker)) {
-          newUrl = tab.url.replace(marker, "");
-        }
-
-        if (newUrl !== tab.url) {
-          chrome.tabs.update(tab.id, { url: newUrl });
-        }
-      }
-    });
-  }
-});
+}
