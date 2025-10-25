@@ -1,13 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Dynamics 365 Forms Tester",
-  "version": "1.0.1",
-  "description": "Tool to test Dynamics 365 Marketing forms by disabling cache and showing a diagnostic overlay.",
+  "name": "Dynamics 365 Form Debugger",
+  "version": "1.0.0",
+  "description": "Debug and test Dynamics 365 Marketing forms by disabling cache. View form details including form ID and field count.",
   "permissions": [
-    "activeTab",
-    "scripting",
     "storage",
-    "tabs"
+    "activeTab"
   ],
   "host_permissions": [
     "<all_urls>"
