@@ -397,7 +397,7 @@ function updateOverlayStatus(formBadge, cacheBadge, formInfoDiv) {
   if (formState.found) {
     formInfoDiv.innerHTML = `
       ID: ${formState.formId} | 
-      Fields: ${formState.fieldCount}
+      Fields (including hidden): ${formState.fieldCount}
     `;
   } else {
     formInfoDiv.innerHTML = '';
