@@ -10,7 +10,6 @@ Test, debug, and validate **Dynamics 365 forms** directly in **Microsoft Edge / 
   <img width="300" alt="English_Get it from Microsoft Edge" src="https://github.com/user-attachments/assets/28f14c7c-a752-4fd0-9bc4-1c6da358adee" />
 </a>
 
-<img width="300" alt="English_Get it from Microsoft Edge" src="https://github.com/user-attachments/assets/28f14c7c-a752-4fd0-9bc4-1c6da358adee" />
 
 **Chrome & Safari coming soon.
 **---
