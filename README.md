@@ -1,4 +1,4 @@
-# Dynamics 365 Form Debugger
+# Dynamics 365 Customer Insights - Form Debugger
 
 ![image](https://repository-images.githubusercontent.com/1082475662/d07f2266-beae-4747-bfc8-2be84cf6efa2)
 
