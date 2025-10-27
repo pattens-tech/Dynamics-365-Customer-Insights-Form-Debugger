@@ -6,7 +6,9 @@ Temporarily disables **Dynamics 365 Customer Insights Forms** cache, allowing yo
 
 Test, debug, and validate **Dynamics 365 forms** directly in **Microsoft Edge / Chrome**.
 
----
+<img width="1178" height="312" alt="English_Get it from Microsoft Edge" src="https://github.com/user-attachments/assets/28f14c7c-a752-4fd0-9bc4-1c6da358adee" />
+**Chrome & Safari coming soon.
+**---
 
 ## Overview
 
