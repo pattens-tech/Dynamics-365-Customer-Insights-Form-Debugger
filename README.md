@@ -14,8 +14,6 @@ Test, debug, and validate **Dynamics 365 forms** directly in **Microsoft Edge / 
 </a>
 
 
-**Chrome & Safari coming soon.
-**---
 
 ## Overview
 
